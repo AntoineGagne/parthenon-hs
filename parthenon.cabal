@@ -64,13 +64,19 @@ executable parthenon
   ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -optP-Wno-nonportable-include-path -flate-dmd-anal -O2 -threaded -rtsopts "-with-rtsopts=-N5 -A4m"
   build-depends:
       base >=4.8 && <5
+    , bytestring
+    , containers
+    , megaparsec >=9.2
+    , parser-combinators
     , parthenon
+    , text
   default-language: Haskell2010
 
 test-suite parthenon-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Parthenon.DecoderSpec
       Paths_parthenon
   hs-source-dirs:
       test
@@ -79,6 +85,13 @@ test-suite parthenon-test
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -optP-Wno-nonportable-include-path -flate-dmd-anal -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.8 && <5
+      QuickCheck
+    , base >=4.8 && <5
+    , bytestring
+    , containers
+    , hspec
+    , megaparsec >=9.2
+    , parser-combinators
     , parthenon
+    , text
   default-language: Haskell2010

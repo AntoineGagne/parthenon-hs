@@ -27,6 +27,11 @@ ghc-options:
   - -flate-dmd-anal
 dependencies:
 - base >= 4.8 && < 5
+- containers
+- bytestring
+- megaparsec >= 9.2
+- parser-combinators
+- text
 default-extensions:
   - ApplicativeDo
   - OverloadedStrings
@@ -35,12 +40,6 @@ library:
   source-dirs: src
   generated-other-modules:
     - Paths_parthenon
-  dependencies:
-    - containers
-    - bytestring
-    - megaparsec >= 9.2
-    - parser-combinators
-    - text
 
 executables:
   parthenon:
@@ -67,3 +66,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - parthenon
+    - hspec
+    - QuickCheck

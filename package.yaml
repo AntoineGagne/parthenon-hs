@@ -1,0 +1,69 @@
+name: parthenon
+version: 0.1.0
+synopsis: Athena Structure Parser
+description:
+    Please see the README on GitHub at <https://github.com/AntoineGagne/parthenon#readme>
+homepage: https://github.com/AntoineGagne/parthenon-hs
+github: "AntoineGagne/parthenon-hs"
+license: BSD3
+author: "Antoine Gagné"
+maintainer: "gagnantoine@gmail.com"
+copyright: "Antoine Gagné"
+extra-source-files:
+- README.md
+
+flags:
+  static:
+    description: Use static linking for the hadolint executable
+    default: true
+    manual: true
+ghc-options:
+  - -Wall
+  - -Wcompat
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wredundant-constraints
+  - -optP-Wno-nonportable-include-path
+  - -flate-dmd-anal
+dependencies:
+- base >= 4.8 && < 5
+default-extensions:
+  - ApplicativeDo
+  - OverloadedStrings
+
+library:
+  source-dirs: src
+  generated-other-modules:
+    - Paths_parthenon
+  dependencies:
+    - containers
+    - bytestring
+    - megaparsec >= 9.2
+    - parser-combinators
+    - text
+
+executables:
+  parthenon:
+    main: Main.hs
+    source-dirs: app
+    ghc-options: -O2 -threaded -rtsopts "-with-rtsopts=-N5 -A4m"
+    dependencies:
+    - parthenon
+    # when:
+    #   # OS X does not support static build
+    #   # https://developer.apple.com/library/content/qa/qa1118
+    #   - condition: "flag(static) && !(os(osx))"
+    #     ld-options:
+    #       - -static
+    #       - -pthread
+
+tests:
+  parthenon-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - parthenon

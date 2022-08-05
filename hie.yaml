@@ -1,0 +1,13 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "parthenon:lib"
+
+    - path: "./app/Main.hs"
+      component: "parthenon:exe:parthenon"
+
+    - path: "./app/Paths_parthenon.hs"
+      component: "parthenon:exe:parthenon"
+
+    - path: "./test"
+      component: "parthenon:test:parthenon-unit-tests"

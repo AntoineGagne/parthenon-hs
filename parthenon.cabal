@@ -1,0 +1,84 @@
+cabal-version: 2.0
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           parthenon
+version:        0.1.0
+synopsis:       Athena Structure Parser
+description:    Please see the README on GitHub at <https://github.com/AntoineGagne/parthenon#readme>
+homepage:       https://github.com/AntoineGagne/parthenon-hs
+bug-reports:    https://github.com/AntoineGagne/parthenon-hs/issues
+author:         Antoine Gagné
+maintainer:     gagnantoine@gmail.com
+copyright:      Antoine Gagné
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/AntoineGagne/parthenon-hs
+
+flag static
+  description: Use static linking for the hadolint executable
+  manual: True
+  default: True
+
+library
+  exposed-modules:
+      Lib
+      Parthenon.Decoder
+      Parthenon.Schema
+  other-modules:
+      Paths_parthenon
+  autogen-modules:
+      Paths_parthenon
+  hs-source-dirs:
+      src
+  default-extensions:
+      ApplicativeDo
+      OverloadedStrings
+  ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -optP-Wno-nonportable-include-path -flate-dmd-anal
+  build-depends:
+      base >=4.8 && <5
+    , bytestring
+    , containers
+    , megaparsec >=9.2
+    , parser-combinators
+    , text
+  default-language: Haskell2010
+
+executable parthenon
+  main-is: Main.hs
+  other-modules:
+      Paths_parthenon
+  hs-source-dirs:
+      app
+  default-extensions:
+      ApplicativeDo
+      OverloadedStrings
+  ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -optP-Wno-nonportable-include-path -flate-dmd-anal -O2 -threaded -rtsopts "-with-rtsopts=-N5 -A4m"
+  build-depends:
+      base >=4.8 && <5
+    , parthenon
+  default-language: Haskell2010
+
+test-suite parthenon-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_parthenon
+  hs-source-dirs:
+      test
+  default-extensions:
+      ApplicativeDo
+      OverloadedStrings
+  ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -optP-Wno-nonportable-include-path -flate-dmd-anal -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.8 && <5
+    , parthenon
+  default-language: Haskell2010

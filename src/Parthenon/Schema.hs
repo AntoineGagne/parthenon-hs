@@ -8,8 +8,8 @@ import Data.Functor (($>))
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Void
-import Parthenon.Decoder (Athena)
 import qualified Parthenon.Decoder as Decoder
+import Parthenon.Types (Athena (..))
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, space)
 import qualified Text.Megaparsec.Char.Lexer as Lexer

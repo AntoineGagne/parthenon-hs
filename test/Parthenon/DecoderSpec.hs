@@ -5,8 +5,8 @@ import Data.Maybe
     isJust,
   )
 import Data.Text (Text)
-import Parthenon.Decoder (Athena (..))
 import qualified Parthenon.Decoder as Decoder
+import Parthenon.Types (Athena (..))
 import Test.Hspec
 import Text.Megaparsec (parseMaybe)
 

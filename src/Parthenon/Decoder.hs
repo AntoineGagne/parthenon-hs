@@ -15,20 +15,11 @@ import Data.Functor (($>))
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Void
+import Parthenon.Types (Athena (..))
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, space)
 import Text.Megaparsec.Char.Lexer (decimal, float)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
-
-data Athena
-  = AStruct (Maybe [(Text, Athena)])
-  | AArray (Maybe [Athena])
-  | AInt (Maybe Int)
-  | AString (Maybe Text)
-  | ABigInt (Maybe Integer)
-  | ADouble (Maybe Double)
-  | ABoolean (Maybe Bool)
-  deriving (Eq, Show)
 
 type Parser = Parsec Void Text
 

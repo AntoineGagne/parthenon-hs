@@ -21,22 +21,24 @@ import Text.Megaparsec.Char.Lexer (decimal, float)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 data Athena
-  = AStruct [(Text, Athena)]
-  | AArray [Athena]
-  | AInt Int
-  | AString Text
-  | ABigInt Integer
-  | ADouble Double
-  | ABoolean Bool
+  = AStruct (Maybe [(Text, Athena)])
+  | AArray (Maybe [Athena])
+  | AInt (Maybe Int)
+  | AString (Maybe Text)
+  | ABigInt (Maybe Integer)
+  | ADouble (Maybe Double)
+  | ABoolean (Maybe Bool)
   deriving (Eq, Show)
 
 type Parser = Parsec Void Text
 
 struct :: [(Text, Parser Athena)] -> Parser Athena
 struct entries' =
-  AStruct <$> do
-    between leftBrace rightBrace entries
+  AStruct <$> (null' <|> struct')
   where
+    struct' :: Parser (Maybe [(Text, Athena)])
+    struct' = Just <$> between leftBrace rightBrace entries
+
     entries :: Parser [(Text, Athena)]
     entries = sepBy (choice decoders) comma
 
@@ -51,28 +53,39 @@ struct entries' =
       pure (key, schema')
 
 array :: Parser Athena -> Parser Athena
-array decoder' = AArray <$> do between leftSquare rightSquare $ sepBy decoder' comma
+array decoder' = AArray <$> (null' <|> array')
+  where
+    array' :: Parser (Maybe [Athena])
+    array' = Just <$> between leftSquare rightSquare (sepBy decoder' comma)
 
 string :: Parser Athena
-string = AString <$> characters
+string = AString <$> (null' <|> (Just <$> characters))
 
 integer :: Parser Athena
-integer = AInt <$> decimal
+integer = AInt <$> (null' <|> Just <$> decimal)
 
 bigInt :: Parser Athena
-bigInt = ABigInt <$> decimal
+bigInt = ABigInt <$> (null' <|> Just <$> decimal)
 
 double :: Parser Athena
-double = ADouble <$> float
+double = ADouble <$> (null' <|> Just <$> float)
 
 boolean :: Parser Athena
-boolean = false <|> true
+boolean = ABoolean <$> (null' <|> boolean')
   where
-    false :: Parser Athena
-    false = symbol "false" $> ABoolean False
+    boolean' :: Parser (Maybe Bool)
+    boolean' = Just <$> (false <|> true)
 
-    true :: Parser Athena
-    true = symbol "true" $> ABoolean True
+    false :: Parser Bool
+    false = symbol "false" $> False
+
+    true :: Parser Bool
+    true = symbol "true" $> True
+
+null' :: Parser (Maybe a)
+null' = do
+  _ <- symbol "null"
+  pure Nothing
 
 equal :: Parser Text
 equal = symbol "="

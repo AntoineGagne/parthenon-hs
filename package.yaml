@@ -26,6 +26,7 @@ ghc-options:
   - -optP-Wno-nonportable-include-path
   - -flate-dmd-anal
 dependencies:
+- aeson
 - base >= 4.8 && < 5
 - containers
 - bytestring

@@ -6,6 +6,7 @@ module Parthenon.Decoder
     bigInt,
     array,
     struct,
+    specialString,
     Athena (..),
   )
 where
@@ -13,11 +14,10 @@ where
 import Control.Monad.Combinators
 import Data.Functor (($>))
 import Data.Text (Text)
-import qualified Data.Text as Text
 import Data.Void
 import Parthenon.Types (Athena (..))
 import Text.Megaparsec
-import Text.Megaparsec.Char (alphaNumChar, controlChar, markChar, space, spaceChar, symbolChar)
+import Text.Megaparsec.Char (space)
 import Text.Megaparsec.Char.Lexer (decimal, float)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
@@ -49,8 +49,17 @@ array decoder' = null' <|> (AArray <$> array')
     array' :: Parser [Athena]
     array' = between leftSquare rightSquare (sepBy decoder' comma)
 
+specialString :: Parser Athena
+specialString = null'
+
 string :: Parser Athena
 string = null' <|> (AString <$> characters)
+  where
+    characters :: Parser Text
+    characters = takeWhileP (Just "character") anyCharacterExceptReserved
+
+    anyCharacterExceptReserved :: Char -> Bool
+    anyCharacterExceptReserved character = character `notElem` ['{', '}', '[', ']', ',']
 
 integer :: Parser Athena
 integer = null' <|> (AInt <$> decimal)
@@ -95,12 +104,6 @@ rightSquare = symbol "]"
 
 comma :: Parser Text
 comma = symbol ","
-
-characters :: Parser Text
-characters = takeWhileP (Just "character") anyCharacterExceptReserved
-  where
-    anyCharacterExceptReserved :: Char -> Bool
-    anyCharacterExceptReserved character = character `notElem` ['{', '}', '[', ']', ',']
 
 symbol :: Tokens Text -> Parser (Tokens Text)
 symbol = Lexer.symbol space

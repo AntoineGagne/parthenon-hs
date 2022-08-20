@@ -1,10 +1,5 @@
 module Parthenon.DecoderSpec where
 
-import Data.Maybe
-  ( fromJust,
-    isJust,
-  )
-import Data.Text (Text)
 import qualified Parthenon.Decoder as Decoder
 import Parthenon.Types (Athena (..))
 import Test.Hspec

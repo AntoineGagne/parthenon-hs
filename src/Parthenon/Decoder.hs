@@ -17,7 +17,7 @@ import qualified Data.Text as Text
 import Data.Void
 import Parthenon.Types (Athena (..))
 import Text.Megaparsec
-import Text.Megaparsec.Char (alphaNumChar, space)
+import Text.Megaparsec.Char (alphaNumChar, controlChar, markChar, space, spaceChar, symbolChar)
 import Text.Megaparsec.Char.Lexer (decimal, float)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
@@ -97,7 +97,10 @@ comma :: Parser Text
 comma = symbol ","
 
 characters :: Parser Text
-characters = Text.pack <$> some alphaNumChar
+characters = takeWhileP (Just "character") anyCharacterExceptReserved
+  where
+    anyCharacterExceptReserved :: Char -> Bool
+    anyCharacterExceptReserved character = character `notElem` ['{', '}', '[', ']', ',']
 
 symbol :: Tokens Text -> Parser (Tokens Text)
 symbol = Lexer.symbol space

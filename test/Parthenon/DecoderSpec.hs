@@ -43,6 +43,17 @@ spec = parallel $ do
       parseMaybe Decoder.integer "-42" `shouldBe` Just (AInt (-42))
     it "can decode null integer" $
       parseMaybe Decoder.integer "null" `shouldBe` Just ANull
+  describe "string" $ do
+    it "can decode string" $
+      parseMaybe Decoder.string "foo" `shouldBe` Just (AString "foo")
+    it "can decode null string" $
+      parseMaybe Decoder.string "null" `shouldBe` Just ANull
+    it "can decode a string with spaces" $
+      parseMaybe Decoder.string "some spaces in between"
+        `shouldBe` Just (AString "some spaces in between")
+    it "can decode a string with special characters" $
+      parseMaybe Decoder.string "(some/spaces\\in|between)"
+        `shouldBe` Just (AString "(some/spaces\\in|between)")
   describe "array" $ do
     it "can decode an array of integer" $
       parseMaybe (Decoder.array Decoder.integer) "[42]"

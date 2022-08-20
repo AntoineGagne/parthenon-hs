@@ -17,47 +17,47 @@ import qualified Text.Megaparsec.Char.Lexer as Lexer
 type Parser = Parsec Void Text
 
 schema :: Parser (Parser Athena)
-schema = try (sArray <|> sStruct)
+schema = try (array <|> struct)
 
-sArray :: Parser (Parser Athena)
-sArray = do
+array :: Parser (Parser Athena)
+array = do
   _ <- symbol "array"
-  encoder <- betweenAngleBrackets sEncoder
-  pure $ Decoder.array encoder
+  encoder' <- betweenAngleBrackets encoder
+  pure $ Decoder.array encoder'
 
-sStruct :: Parser (Parser Athena)
-sStruct = do
+struct :: Parser (Parser Athena)
+struct = do
   _ <- symbol "struct"
-  encoders <- betweenAngleBrackets (sepBy sKeyValue comma)
+  encoders <- betweenAngleBrackets (sepBy keyValue comma)
   pure $ Decoder.struct encoders
+  where
+    keyValue :: Parser (Text, Parser Athena)
+    keyValue = do
+      key <- characters
+      _ <- symbol ":"
+      decoder <- encoder
+      pure (key, decoder)
 
-sKeyValue :: Parser (Text, Parser Athena)
-sKeyValue = do
-  key <- characters
-  _ <- symbol ":"
-  decoder <- sEncoder
-  pure (key, decoder)
+encoder :: Parser (Parser Athena)
+encoder = try (integer <|> bigInt <|> boolean <|> double <|> string <|> struct <|> array)
+  where
+    string :: Parser (Parser Athena)
+    string = symbol "string" $> Decoder.string
 
-sEncoder :: Parser (Parser Athena)
-sEncoder = try (sInteger <|> sBigInt <|> sBoolean <|> sDouble <|> sString <|> sStruct <|> sArray)
+    integer :: Parser (Parser Athena)
+    integer = symbol "int" $> Decoder.integer
+
+    bigInt :: Parser (Parser Athena)
+    bigInt = symbol "bigint" $> Decoder.bigInt
+
+    double :: Parser (Parser Athena)
+    double = symbol "double" $> Decoder.double
+
+    boolean :: Parser (Parser Athena)
+    boolean = symbol "boolean" $> Decoder.boolean
 
 betweenAngleBrackets :: Parser a -> Parser a
 betweenAngleBrackets = between leftAngle rightAngle
-
-sString :: Parser (Parser Athena)
-sString = symbol "string" $> Decoder.string
-
-sInteger :: Parser (Parser Athena)
-sInteger = symbol "int" $> Decoder.integer
-
-sBigInt :: Parser (Parser Athena)
-sBigInt = symbol "bigint" $> Decoder.bigInt
-
-sDouble :: Parser (Parser Athena)
-sDouble = symbol "double" $> Decoder.double
-
-sBoolean :: Parser (Parser Athena)
-sBoolean = symbol "boolean" $> Decoder.boolean
 
 characters :: Parser Text
 characters = Text.pack <$> some alphaNumChar

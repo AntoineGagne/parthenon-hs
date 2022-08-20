@@ -25,10 +25,10 @@ type Parser = Parsec Void Text
 
 struct :: [(Text, Parser Athena)] -> Parser Athena
 struct entries' =
-  AStruct <$> (null' <|> struct')
+  null' <|> (AStruct <$> struct')
   where
-    struct' :: Parser (Maybe [(Text, Athena)])
-    struct' = Just <$> between leftBrace rightBrace entries
+    struct' :: Parser [(Text, Athena)]
+    struct' = between leftBrace rightBrace entries
 
     entries :: Parser [(Text, Athena)]
     entries = sepBy (choice decoders) comma
@@ -44,28 +44,28 @@ struct entries' =
       pure (key, schema')
 
 array :: Parser Athena -> Parser Athena
-array decoder' = AArray <$> (null' <|> array')
+array decoder' = null' <|> (AArray <$> array')
   where
-    array' :: Parser (Maybe [Athena])
-    array' = Just <$> between leftSquare rightSquare (sepBy decoder' comma)
+    array' :: Parser [Athena]
+    array' = between leftSquare rightSquare (sepBy decoder' comma)
 
 string :: Parser Athena
-string = AString <$> (null' <|> (Just <$> characters))
+string = null' <|> (AString <$> characters)
 
 integer :: Parser Athena
-integer = AInt <$> (null' <|> Just <$> decimal)
+integer = null' <|> (AInt <$> decimal)
 
 bigInt :: Parser Athena
-bigInt = ABigInt <$> (null' <|> Just <$> decimal)
+bigInt = null' <|> (ABigInt <$> decimal)
 
 double :: Parser Athena
-double = ADouble <$> (null' <|> Just <$> float)
+double = null' <|> (ADouble <$> float)
 
 boolean :: Parser Athena
-boolean = ABoolean <$> (null' <|> boolean')
+boolean = null' <|> (ABoolean <$> boolean')
   where
-    boolean' :: Parser (Maybe Bool)
-    boolean' = Just <$> (false <|> true)
+    boolean' :: Parser Bool
+    boolean' = false <|> true
 
     false :: Parser Bool
     false = symbol "false" $> False
@@ -73,10 +73,10 @@ boolean = ABoolean <$> (null' <|> boolean')
     true :: Parser Bool
     true = symbol "true" $> True
 
-null' :: Parser (Maybe a)
+null' :: Parser Athena
 null' = do
   _ <- symbol "null"
-  pure Nothing
+  pure ANull
 
 equal :: Parser Text
 equal = symbol "="

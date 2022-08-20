@@ -17,102 +17,92 @@ spec :: Spec
 spec = parallel $ do
   describe "double" $ do
     it "can decode a double" $
-      parseMaybe Decoder.double "2.0" `shouldBe` Just (ADouble (Just 2.0))
+      parseMaybe Decoder.double "2.0" `shouldBe` Just (ADouble 2.0)
     it "can decode negative double" $
-      parseMaybe Decoder.double "-2.0" `shouldBe` Just (ADouble (Just (-2.0)))
+      parseMaybe Decoder.double "-2.0" `shouldBe` Just (ADouble (-2.0))
     it "can decode null double" $
-      parseMaybe Decoder.double "null" `shouldBe` Just (ADouble Nothing)
+      parseMaybe Decoder.double "null" `shouldBe` Just ANull
   describe "boolean" $ do
     it "can decode \"true\"" $
-      parseMaybe Decoder.boolean "true" `shouldBe` Just (ABoolean (Just True))
+      parseMaybe Decoder.boolean "true" `shouldBe` Just (ABoolean True)
     it "can decode \"false\"" $
-      parseMaybe Decoder.boolean "false" `shouldBe` Just (ABoolean (Just False))
+      parseMaybe Decoder.boolean "false" `shouldBe` Just (ABoolean False)
     it "can decode null boolean" $
-      parseMaybe Decoder.boolean "null" `shouldBe` Just (ABoolean Nothing)
+      parseMaybe Decoder.boolean "null" `shouldBe` Just ANull
   describe "bigInt" $ do
     it "can decode a big integer" $
-      parseMaybe Decoder.bigInt "2000000" `shouldBe` Just (ABigInt (Just 2000000))
+      parseMaybe Decoder.bigInt "2000000" `shouldBe` Just (ABigInt 2000000)
     it "can decode a negative big integer" $
-      parseMaybe Decoder.bigInt "-2000000" `shouldBe` Just (ABigInt (Just (-2000000)))
+      parseMaybe Decoder.bigInt "-2000000" `shouldBe` Just (ABigInt (-2000000))
     it "can decode a null big integer" $
-      parseMaybe Decoder.bigInt "null" `shouldBe` Just (ABigInt Nothing)
+      parseMaybe Decoder.bigInt "null" `shouldBe` Just ANull
   describe "integer" $ do
     it "can decode an integer" $
-      parseMaybe Decoder.integer "42" `shouldBe` Just (AInt (Just 42))
+      parseMaybe Decoder.integer "42" `shouldBe` Just (AInt 42)
     it "can decode negative integer" $
-      parseMaybe Decoder.integer "-42" `shouldBe` Just (AInt (Just (-42)))
+      parseMaybe Decoder.integer "-42" `shouldBe` Just (AInt (-42))
     it "can decode null integer" $
-      parseMaybe Decoder.integer "null" `shouldBe` Just (AInt Nothing)
+      parseMaybe Decoder.integer "null" `shouldBe` Just ANull
   describe "array" $ do
     it "can decode an array of integer" $
       parseMaybe (Decoder.array Decoder.integer) "[42]"
-        `shouldBe` Just (AArray (Just [Decoder.AInt (Just 42)]))
+        `shouldBe` Just (AArray [Decoder.AInt 42])
     it "can decode an array of big integer" $
       parseMaybe (Decoder.array Decoder.bigInt) "[42, 7]"
         `shouldBe` Just
           ( AArray
-              (Just [ABigInt (Just 42), Decoder.ABigInt (Just 7)])
+              [ABigInt 42, ABigInt 7]
           )
     it "can decode an array of simple strings" $
       parseMaybe (Decoder.array Decoder.string) "[foo, bar]"
         `shouldBe` Just
           ( AArray
-              (Just [AString (Just "foo"), Decoder.AString (Just "bar")])
+              [AString "foo", AString "bar"]
           )
     it "can decode an array of strings with spaces" $
       parseMaybe (Decoder.array Decoder.string) "[foo hello, bar world]"
         `shouldBe` Just
           ( AArray
-              ( Just
-                  ( [ AString (Just "foo hello"),
-                      AString (Just "bar world")
-                    ]
-                  )
-              )
+              [ AString "foo hello",
+                AString "bar world"
+              ]
           )
     it "can decode an array of strings with special characters" $
       parseMaybe (Decoder.array Decoder.string) "[application/json, application/text]"
         `shouldBe` Just
           ( AArray
-              ( Just
-                  ( [ AString (Just "application/json"),
-                      AString (Just "application/text")
-                    ]
-                  )
-              )
+              [ AString "application/json",
+                AString "application/text"
+              ]
           )
     it "can decode an array of boolean" $
       parseMaybe (Decoder.array Decoder.boolean) "[true, false]"
         `shouldBe` Just
           ( AArray
-              ( Just ([ABoolean (Just True), Decoder.ABoolean (Just False)])
-              )
+              [ABoolean True, ABoolean False]
           )
     it "can decode an array with null values" $
       parseMaybe (Decoder.array Decoder.boolean) "[null, null, true]"
         `shouldBe` Just
           ( AArray
-              ( Just
-                  ( [ ABoolean Nothing,
-                      ABoolean Nothing,
-                      ABoolean (Just True)
-                    ]
-                  )
-              )
+              [ ANull,
+                ANull,
+                ABoolean True
+              ]
           )
     it "can decode a null array" $
       parseMaybe (Decoder.array Decoder.boolean) "null"
-        `shouldBe` Just (AArray Nothing)
+        `shouldBe` Just ANull
   describe "struct" $ do
     it "can decode an empty struct" $
       parseMaybe (Decoder.struct [("a", Decoder.integer)]) "{}"
-        `shouldBe` Just (AStruct (Just []))
+        `shouldBe` Just (AStruct [])
     it "can decode a null struct" $
       parseMaybe (Decoder.struct [("a", Decoder.integer)]) "null"
-        `shouldBe` Just (AStruct Nothing)
+        `shouldBe` Just ANull
     it "can decode a flat struct" $
       parseMaybe (Decoder.struct [("a", Decoder.integer)]) "{a=1}"
-        `shouldBe` Just (AStruct (Just [("a", Decoder.AInt (Just 1))]))
+        `shouldBe` Just (AStruct [("a", AInt 1)])
     it "can decode a flat struct with multiple fields" $
       parseMaybe
         ( Decoder.struct
@@ -126,15 +116,12 @@ spec = parallel $ do
         "{a=1,b=foo,c=true,d=2.0,e=2000}"
         `shouldBe` Just
           ( AStruct
-              ( Just
-                  ( [ ("a", AInt (Just 1)),
-                      ("b", AString (Just "foo")),
-                      ("c", ABoolean (Just True)),
-                      ("d", ADouble (Just 2.0)),
-                      ("e", ABigInt (Just 2000))
-                    ]
-                  )
-              )
+              [ ("a", AInt 1),
+                ("b", AString "foo"),
+                ("c", ABoolean True),
+                ("d", ADouble 2.0),
+                ("e", ABigInt 2000)
+              ]
           )
     it "can decode a flat struct with spaces" $
       parseMaybe
@@ -146,31 +133,23 @@ spec = parallel $ do
         "{a = 1, b = 5}"
         `shouldBe` Just
           ( AStruct
-              ( Just
-                  ( [ ("a", AInt (Just 1)),
-                      ("b", AInt (Just 5))
-                    ]
-                  )
-              )
+              [ ("a", AInt 1),
+                ("b", AInt 5)
+              ]
           )
     it "can decode a struct with array" $
       parseMaybe (Decoder.struct [("a", Decoder.array Decoder.integer)]) "{a=[1, 2, 3, 4]}"
         `shouldBe` Just
           ( AStruct
-              ( Just
-                  ( [ ( "a",
-                        AArray
-                          ( Just
-                              [ AInt (Just 1),
-                                AInt (Just 2),
-                                AInt (Just 3),
-                                AInt (Just 4)
-                              ]
-                          )
-                      )
+              [ ( "a",
+                  AArray
+                    [ AInt 1,
+                      AInt 2,
+                      AInt 3,
+                      AInt 4
                     ]
-                  )
-              )
+                )
+              ]
           )
     it "can decode a struct with array of structs" $
       parseMaybe
@@ -183,30 +162,21 @@ spec = parallel $ do
         "{a = [{b = [1, 2, 3, 4]}]}"
         `shouldBe` Just
           ( AStruct
-              ( Just
-                  ( [ ( "a",
-                        AArray
-                          ( Just
-                              [ AStruct
-                                  ( Just
-                                      [ ( "b",
-                                          AArray
-                                            ( Just
-                                                [ AInt (Just 1),
-                                                  AInt (Just 2),
-                                                  AInt (Just 3),
-                                                  AInt (Just 4)
-                                                ]
-                                            )
-                                        )
-                                      ]
-                                  )
+              [ ( "a",
+                  AArray
+                    [ AStruct
+                        [ ( "b",
+                            AArray
+                              [ AInt 1,
+                                AInt 2,
+                                AInt 3,
+                                AInt 4
                               ]
                           )
-                      )
+                        ]
                     ]
-                  )
-              )
+                )
+              ]
           )
     it "can decode a struct with string that contain commas, spaces and special characters" $
       parseMaybe
@@ -217,12 +187,10 @@ spec = parallel $ do
         "{a = Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36}"
         `shouldBe` Just
           ( AStruct
-              ( Just
-                  ( [ ( "a",
-                        AString (Just "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36")
-                      )
-                    ]
+              ( [ ( "a",
+                    AString "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"
                   )
+                ]
               )
           )
     it "can decode a struct with multiple fields with string that contain commas, spaces and special characters" $
@@ -235,14 +203,11 @@ spec = parallel $ do
         "{a = Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36, b=3}"
         `shouldBe` Just
           ( AStruct
-              ( Just
-                  ( [ ( "a",
-                        AString (Just "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36")
-                      ),
-                      ( "b",
-                        AInt (Just 3)
-                      )
-                    ]
-                  )
-              )
+              [ ( "a",
+                  AString "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"
+                ),
+                ( "b",
+                  AInt 3
+                )
+              ]
           )

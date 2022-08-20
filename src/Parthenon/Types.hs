@@ -11,22 +11,22 @@ import Data.Text (Text)
 import GHC.Generics
 
 data Athena
-  = AStruct (Maybe [(Text, Athena)])
-  | AArray (Maybe [Athena])
-  | AInt (Maybe Int)
-  | AString (Maybe Text)
-  | ABigInt (Maybe Integer)
-  | ADouble (Maybe Double)
-  | ABoolean (Maybe Bool)
+  = AStruct [(Text, Athena)]
+  | AArray [Athena]
+  | AInt Int
+  | AString Text
+  | ABigInt Integer
+  | ADouble Double
+  | ABoolean Bool
+  | ANull
   deriving (Eq, Generic, Show)
 
 instance ToJSON Athena where
-  toJSON (AStruct (Just keyValues)) = object [fromText key .= toJSON value | (key, value) <- keyValues]
-  toJSON (AStruct nothing) = toJSON nothing
-  toJSON (AArray (Just values)) = toJSON $ map toJSON values
-  toJSON (AArray nothing) = toJSON nothing
+  toJSON (AStruct keyValues) = object [fromText key .= toJSON value | (key, value) <- keyValues]
+  toJSON (AArray values) = toJSON $ map toJSON values
   toJSON (AInt value) = toJSON value
   toJSON (AString value) = toJSON value
   toJSON (ADouble value) = toJSON value
   toJSON (ABigInt value) = toJSON value
   toJSON (ABoolean value) = toJSON value
+  toJSON ANull = Null

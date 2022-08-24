@@ -11,13 +11,13 @@ on:
     paths:
       - '.github/workflows/haskell.yml'
       - 'stack*.yaml'
-      - 'hadolint.cabal'
+      - 'parthenon.cabal'
       - 'app/**'
       - 'src/**'
       - 'test/**'
 
 jobs:
-  hadolint:
+  parthenon:
     runs-on: ${{ matrix.os }}
 
     strategy:

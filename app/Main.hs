@@ -14,11 +14,12 @@ import Text.Megaparsec
 main :: IO ()
 main = do
   defaultDataDirectory <- getXdgDirectory XdgData ""
-  invokedWith <- execParser (Parthenon.options defaultDataDirectory)
-  let schemaDirectory = oSchemaDirectory invokedWith </> "parthenon"
+  let defaultDirectory = defaultDataDirectory </> "parthenon"
+  createDirectoryIfMissing True defaultDirectory
+  invokedWith <- execParser (Parthenon.options defaultDirectory)
+  let schemaDirectory = oSchemaDirectory invokedWith
       schema = schemaDirectory </> oSchema invokedWith
       input = oInput invokedWith
-  createDirectoryIfMissing True schemaDirectory
   rawSchema <- TextIO.readFile schema
   rawAthena <- getAthena input
   case decode rawSchema rawAthena of

@@ -87,6 +87,7 @@ test-suite parthenon-test
   main-is: Spec.hs
   other-modules:
       Parthenon.DecoderSpec
+      Parthenon.SchemaSpec
       Paths_parthenon
   hs-source-dirs:
       test

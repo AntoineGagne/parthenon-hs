@@ -6,12 +6,11 @@ where
 import Control.Monad.Combinators
 import Data.Functor (($>))
 import Data.Text (Text)
-import qualified Data.Text as Text
 import Data.Void
 import qualified Parthenon.Decoder as Decoder
 import Parthenon.Types (Athena (..))
 import Text.Megaparsec
-import Text.Megaparsec.Char (alphaNumChar, space)
+import Text.Megaparsec.Char (space)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 type Parser = Parsec Void Text
@@ -60,7 +59,10 @@ betweenAngleBrackets :: Parser a -> Parser a
 betweenAngleBrackets = between leftAngle rightAngle
 
 characters :: Parser Text
-characters = Text.pack <$> some alphaNumChar
+characters = takeWhileP (Just "character") anyCharacterExceptReserved
+  where
+    anyCharacterExceptReserved :: Char -> Bool
+    anyCharacterExceptReserved character = character `notElem` ['<', '>', ':', ',']
 
 symbol :: Tokens Text -> Parser (Tokens Text)
 symbol = Lexer.symbol space

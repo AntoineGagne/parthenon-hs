@@ -31,7 +31,7 @@ struct entries' =
     struct' = between leftBrace rightBrace entries
 
     entries :: Parser [(Text, Athena)]
-    entries = sepBy (choice decoders) comma
+    entries = choice decoders `sepBy` comma
 
     decoders :: [Parser (Text, Athena)]
     decoders = map decoder entries'
@@ -62,13 +62,13 @@ string = null' <|> (AString <$> characters)
     anyCharacterExceptReserved character = character `notElem` ['{', '}', '[', ']', ',']
 
 integer :: Parser Athena
-integer = null' <|> (AInt <$> decimal)
+integer = null' <|> (AInt <$> Lexer.signed space decimal)
 
 bigInt :: Parser Athena
-bigInt = null' <|> (ABigInt <$> decimal)
+bigInt = null' <|> (ABigInt <$> Lexer.signed space decimal)
 
 double :: Parser Athena
-double = null' <|> (ADouble <$> float)
+double = null' <|> (ADouble <$> Lexer.signed space float)
 
 boolean :: Parser Athena
 boolean = null' <|> (ABoolean <$> boolean')

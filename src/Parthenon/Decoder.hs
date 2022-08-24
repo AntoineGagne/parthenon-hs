@@ -47,7 +47,7 @@ array :: Parser Athena -> Parser Athena
 array decoder' = null' <|> (AArray <$> array')
   where
     array' :: Parser [Athena]
-    array' = between leftSquare rightSquare (sepBy decoder' comma)
+    array' = between leftSquare rightSquare (decoder' `sepBy` comma)
 
 specialString :: Parser Athena
 specialString = null'

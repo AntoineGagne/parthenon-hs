@@ -1,5 +1,7 @@
 # parthenon
 
+[![Build Status](https://github.com/AntoineGagne/parthenon-hs/actions/workflows/haskell.yml/badge.svg)](https://github.com/AntoineGagne/parthenon-hs/actions)
+
 ## How to get
 
 ### Build from source
@@ -14,8 +16,8 @@ stack build
 ## Usage
 
 ```sh
-# Create a schema and put it inside the schemas folder (this folder varies
-# depending on the platform)
+# Create a schema and put it inside the schemas folder (this folder location
+# varies depending on the platform)
 $ cat << EOF > ~/.local/share/parthenon/vectors
 array<struct<x: double, y: double, z: double>>
 EOF

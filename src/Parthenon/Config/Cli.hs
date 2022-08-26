@@ -32,6 +32,7 @@ options directory =
               <> short 'd'
               <> value directory
               <> metavar "DIRECTORY"
+              <> showDefault
               <> help "Specify the directory where the schema is located"
           )
         <*> switch

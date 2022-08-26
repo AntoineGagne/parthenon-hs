@@ -14,7 +14,7 @@ extra-source-files:
 
 flags:
   static:
-    description: Use static linking for the hadolint executable
+    description: Use static linking for the parthenon executable
     default: true
     manual: true
 ghc-options:
@@ -26,7 +26,16 @@ ghc-options:
   - -optP-Wno-nonportable-include-path
   - -flate-dmd-anal
 dependencies:
+- aeson
 - base >= 4.8 && < 5
+- containers
+- directory
+- filepath
+- optparse-applicative
+- bytestring
+- megaparsec >= 9.2
+- parser-combinators
+- text
 default-extensions:
   - ApplicativeDo
   - OverloadedStrings
@@ -35,12 +44,6 @@ library:
   source-dirs: src
   generated-other-modules:
     - Paths_parthenon
-  dependencies:
-    - containers
-    - bytestring
-    - megaparsec >= 9.2
-    - parser-combinators
-    - text
 
 executables:
   parthenon:
@@ -49,13 +52,13 @@ executables:
     ghc-options: -O2 -threaded -rtsopts "-with-rtsopts=-N5 -A4m"
     dependencies:
     - parthenon
-    # when:
-    #   # OS X does not support static build
-    #   # https://developer.apple.com/library/content/qa/qa1118
-    #   - condition: "flag(static) && !(os(osx))"
-    #     ld-options:
-    #       - -static
-    #       - -pthread
+    when:
+      # OS X does not support static build
+      # https://developer.apple.com/library/content/qa/qa1118
+      - condition: "flag(static) && !(os(osx))"
+        ld-options:
+          - -static
+          - -pthread
 
 tests:
   parthenon-test:
@@ -67,3 +70,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - parthenon
+    - hspec
+    - QuickCheck

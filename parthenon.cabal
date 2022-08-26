@@ -80,6 +80,8 @@ executable parthenon
     , parser-combinators
     , parthenon
     , text
+  if flag(static) && !(os(osx))
+    ld-options: -static -pthread
   default-language: Haskell2010
 
 test-suite parthenon-test

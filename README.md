@@ -2,6 +2,8 @@
 
 [![Build Status](https://github.com/AntoineGagne/parthenon-hs/actions/workflows/haskell.yml/badge.svg)](https://github.com/AntoineGagne/parthenon-hs/actions)
 
+`parthenon` is a tool that convert Athena terms into JSON values.
+
 ## How to get
 
 ### Build from source

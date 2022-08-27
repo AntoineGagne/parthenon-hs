@@ -26,7 +26,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: parthenon-Linux-x86-64
+        name: parthenon-Linux-x86_64
         path: build/bin/parthenon
         retention-days: 3
 
@@ -56,7 +56,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: parthenon-Windows-x86_64.exe
+        name: parthenon-Windows-x86_64
         path: build/bin/parthenon.exe
         retention-days: 3
 
@@ -81,7 +81,7 @@ jobs:
           push: true
           tags: |
             parthenon/parthenon:latest
-            parthenon/parthenon:${{github.ref}}
+            parthenon/parthenon:${{github.ref_name}}
             parthenon/parthenon:${{github.sha}}
 
   create-release:

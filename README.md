@@ -52,8 +52,8 @@ parthenon 'array<struct<x: double, y: double, z: double>>' @athena-vectors
 Using the Docker image is similar to the commands above:
 
 ```sh
-$ docker run --rm -i parthenon:latest 'array<struct<x: double, y: double, z: double>>' '[{x=1.0, y=1.0, z=1.0}]'
-$ echo '[{x=1.0, y=1.0, z=1.0}]' | docker run --rm -i parthenon:latest 'array<struct<x: double, y: double, z: double>>'
+docker run --rm -i parthenon:latest 'array<struct<x: double, y: double, z: double>>' '[{x=1.0, y=1.0, z=1.0}]'
+echo '[{x=1.0, y=1.0, z=1.0}]' | docker run --rm -i parthenon:latest 'array<struct<x: double, y: double, z: double>>'
 ```
 
 To make it easier to invoke the image, the following alias can be used:

@@ -29,22 +29,22 @@ docker build . -t parthenon:latest
 
 ```sh
 # Create a schema
-$ cat << EOF > vectors
+cat << EOF > vectors
 array<struct<x: double, y: double, z: double>>
 EOF
 
-$ cat << EOF > athena-vectors
+cat << EOF > athena-vectors
 [{x=1.0, y=1.0, z=1.0}]
 EOF
 
-$ echo '[{x=1.0, y=1.0, z=1.0}]' | parthenon @vectors -
-[{"x":1,"y":1,"z":1}]
-$ echo '[{x=1.0, y=1.0, z=1.0}]' | parthenon 'array<struct<x: double, y: double, z: double>>' -
-[{"x":1,"y":1,"z":1}]
-$ parthenon 'array<struct<x: double, y: double, z: double>>' '[{x=1.0, y=1.0, z=1.0}]'
-[{"x":1,"y":1,"z":1}]
-$ parthenon 'array<struct<x: double, y: double, z: double>>' @athena-vectors
-[{"x":1,"y":1,"z":1}]
+echo '[{x=1.0, y=1.0, z=1.0}]' | parthenon @vectors -
+# [{"x":1,"y":1,"z":1}]
+echo '[{x=1.0, y=1.0, z=1.0}]' | parthenon 'array<struct<x: double, y: double, z: double>>' -
+# [{"x":1,"y":1,"z":1}]
+parthenon 'array<struct<x: double, y: double, z: double>>' '[{x=1.0, y=1.0, z=1.0}]'
+# [{"x":1,"y":1,"z":1}]
+parthenon 'array<struct<x: double, y: double, z: double>>' @athena-vectors
+# [{"x":1,"y":1,"z":1}]
 ```
 
 ### With the Docker image

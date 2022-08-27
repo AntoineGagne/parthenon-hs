@@ -60,29 +60,30 @@ jobs:
         path: build/bin/parthenon.exe
         retention-days: 3
 
-  docker:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+  # Pushing seems to require a pro account
+  # docker:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+  #     - name: Login to DockerHub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
-      - name: Push Docker Image Scratch
-        uses: docker/build-push-action@v3
-        with:
-          push: true
-          tags: |
-            parthenon/parthenon:latest
-            parthenon/parthenon:${{github.ref_name}}
-            parthenon/parthenon:${{github.sha}}
+  #     - name: Push Docker Image Scratch
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         push: true
+  #         tags: |
+  #           parthenon/parthenon:latest
+  #           parthenon/parthenon:${{github.ref_name}}
+  #           parthenon/parthenon:${{github.sha}}
 
   create-release:
     needs: [build-linux, build-macos, build-windows]

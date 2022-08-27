@@ -1,0 +1,95 @@
+name: Release
+on: push
+  # push:
+  #   tags:
+  #     - "*.*.*"
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run tests
+      run: stack test
+
+  build-binaries:
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Compile binary
+      run: stack --local-bin-path=build/bin install
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: parthenon-${{steps.build-opts.outputs.arch}}
+        path: build/bin/parthenon
+        retention-days: 3
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      # - name: Push Docker Image Scratch
+      #   uses: docker/build-push-action@v3
+      #   with:
+      #     push: true
+      #     tags: |
+      #       parthenon/parthenon:latest
+      #       parthenon/parthenon:${{github.ref}}
+      #       parthenon/parthenon:${{github.sha}}
+
+  create-release:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+    # - name: Create Release
+    #   id: create_release
+    #   uses: actions/create-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     tag_name: ${{ github.ref }}
+    #     draft: false
+    #     prerelease: false
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v2
+      with:
+        path: assets/
+
+    - name: Display structure of downloaded files
+      run: ls -lR
+      working-directory: assets/
+
+    # - name: Upload Release Assets
+    #   id: upload_release_assets
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ./assets/parthenon_linux_musl/parthenon
+    #     asset_name: parthenon_linux_musl
+    #     asset_content_type: application/octet-stream

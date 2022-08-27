@@ -4,24 +4,22 @@ import Data.Aeson (encode)
 import qualified Data.ByteString.Lazy as ByteString
 import Data.Text (Text)
 import qualified Data.Text.IO as TextIO
-import Options.Applicative (execParser)
-import Parthenon (Options (..))
+import Options.Applicative (customExecParser)
+import Parthenon
+  ( FileArgument (..),
+    InputArgument (..),
+    Options (..),
+  )
 import qualified Parthenon
-import System.Directory (XdgDirectory (XdgData), createDirectoryIfMissing, getXdgDirectory)
-import System.FilePath ((</>))
 import Text.Megaparsec
 
 main :: IO ()
 main = do
-  defaultDataDirectory <- getXdgDirectory XdgData ""
-  let defaultDirectory = defaultDataDirectory </> "parthenon"
-  createDirectoryIfMissing True defaultDirectory
-  invokedWith <- execParser (Parthenon.options defaultDirectory)
-  let schemaDirectory = oSchemaDirectory invokedWith
-      schema = schemaDirectory </> oSchema invokedWith
+  invokedWith <- customExecParser Parthenon.preferences Parthenon.options
+  let schema = oSchema invokedWith
       input = oInput invokedWith
-  rawSchema <- TextIO.readFile schema
-  rawAthena <- getAthena input
+  rawSchema <- fromFileArgument schema
+  rawAthena <- fromInputArgument input
   case decode rawSchema rawAthena of
     Right parsed ->
       ByteString.putStr $ encode parsed
@@ -32,9 +30,18 @@ main = do
       parser <- runParser Parthenon.schema "schema" rawSchema
       runParser parser "athena" rawAthena
 
-    getAthena :: Text -> IO Text
-    getAthena raw = case raw of
-      "-" ->
+    fromFileArgument :: FileArgument -> IO Text
+    fromFileArgument raw = case raw of
+      FFromFile filepath ->
+        TextIO.readFile filepath
+      FFromArgument other ->
+        pure other
+
+    fromInputArgument :: InputArgument -> IO Text
+    fromInputArgument raw = case raw of
+      IFromStdin ->
         TextIO.getContents
-      other ->
+      IFromFile filepath ->
+        TextIO.readFile filepath
+      IFromArgument other ->
         pure other

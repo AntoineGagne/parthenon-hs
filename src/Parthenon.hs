@@ -2,6 +2,9 @@ module Parthenon
   ( Schema.schema,
     Types.Athena (..),
     Cli.Options (..),
+    Cli.FileArgument (..),
+    Cli.InputArgument (..),
+    Cli.preferences,
     Cli.options,
   )
 where

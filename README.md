@@ -6,6 +6,22 @@
 
 ## How to get
 
+### Downloading binaries
+
+The binaries can be found in the
+[Releases](https://github.com/AntoineGagne/parthenon-hs/releases) section.
+
+### Downloading the Docker image
+
+The latest image can be downloaded via the following command:
+
+```sh
+docker pull haskellenthusiast/parthenon
+```
+
+Other images can be found at
+[Dockerhub](https://hub.docker.com/r/haskellenthusiast/parthenon).
+
 ### Building
 
 #### Build from source

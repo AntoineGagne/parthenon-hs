@@ -15,12 +15,9 @@ jobs:
     - name: Run tests
       run: stack test
 
-  build-binaries:
+  build-linux:
     needs: test
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Compile binary
@@ -29,7 +26,39 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: parthenon-${{steps.build-opts.outputs.arch}}
+        name: parthenon-Linux-x86-64
+        path: build/bin/parthenon
+        retention-days: 3
+
+  build-macos:
+    needs: test
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Compile binary
+      run: stack --local-bin-path=build/bin install
+
+    - run: ls -lR build/bin/
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: parthenon-Darwin-x86_64
+        path: build/bin/parthenon
+        retention-days: 3
+
+  build-windows:
+    needs: test
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Compile binary
+      run: stack --local-bin-path=build/bin install
+    - run: dir build/bin/
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: parthenon-Windows-x86_64.exe
         path: build/bin/parthenon
         retention-days: 3
 
@@ -58,11 +87,8 @@ jobs:
       #       parthenon/parthenon:${{github.sha}}
 
   create-release:
-    needs: build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
     steps:
     # - name: Create Release
     #   id: create_release

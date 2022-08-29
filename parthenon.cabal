@@ -50,8 +50,6 @@ library
     , base >=4.8 && <5
     , bytestring
     , containers
-    , directory
-    , filepath
     , megaparsec >=9.2
     , optparse-applicative
     , parser-combinators
@@ -73,8 +71,6 @@ executable parthenon
     , base >=4.8 && <5
     , bytestring
     , containers
-    , directory
-    , filepath
     , megaparsec >=9.2
     , optparse-applicative
     , parser-combinators
@@ -103,8 +99,6 @@ test-suite parthenon-test
     , base >=4.8 && <5
     , bytestring
     , containers
-    , directory
-    , filepath
     , hspec
     , megaparsec >=9.2
     , optparse-applicative

@@ -29,8 +29,6 @@ dependencies:
 - aeson
 - base >= 4.8 && < 5
 - containers
-- directory
-- filepath
 - optparse-applicative
 - bytestring
 - megaparsec >= 9.2

@@ -13,6 +13,9 @@ where
 
 import Control.Monad.Combinators
 import Data.Functor (($>))
+import Data.Map.Strict (Map, (!?))
+import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.Void
 import Parthenon.Types (Athena (..))
@@ -31,17 +34,32 @@ struct entries' =
     struct' = between leftBrace rightBrace entries
 
     entries :: Parser [(Text, Athena)]
-    entries = choice decoders `sepBy` comma
+    entries = decoder `sepBy` comma
 
-    decoders :: [Parser (Text, Athena)]
-    decoders = map decoder entries'
-
-    decoder :: (Text, Parser Athena) -> Parser (Text, Athena)
-    decoder (key, decoder') = do
-      _ <- symbol key
+    decoder :: Parser (Text, Athena)
+    decoder = do
+      key' <- keys
       _ <- equal
-      schema' <- decoder'
-      pure (key, schema')
+      schema' <- try $ getDecoder key'
+      pure (key', schema')
+
+    keys :: Parser Text
+    keys =
+      let (rawKeys', _) = unzip entries'
+          keys' = map symbol rawKeys'
+       in (try (choice keys') <|> key)
+
+    key :: Parser Text
+    key = takeWhileP (Just "key") anyCharacterExceptReserved
+      where
+        anyCharacterExceptReserved :: Char -> Bool
+        anyCharacterExceptReserved character = character `notElem` ['{', '}', '[', ']', ',', '=']
+
+    getDecoder :: Text -> Parser Athena
+    getDecoder key' = fromMaybe string $ decodersByKeys !? key'
+
+    decodersByKeys :: Map Text (Parser Athena)
+    decodersByKeys = Map.fromList entries'
 
 array :: Parser Athena -> Parser Athena
 array decoder' = null' <|> (AArray <$> array')

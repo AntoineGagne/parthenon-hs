@@ -31,17 +31,30 @@ struct entries' =
     struct' = between leftBrace rightBrace entries
 
     entries :: Parser [(Text, Athena)]
-    entries = choice decoders `sepBy` comma
+    entries = (choice decoders <|> unknownDecoder) `sepBy` comma
 
     decoders :: [Parser (Text, Athena)]
     decoders = map decoder entries'
 
     decoder :: (Text, Parser Athena) -> Parser (Text, Athena)
-    decoder (key, decoder') = do
-      _ <- symbol key
+    decoder (key', decoder') = do
+      _ <- try $ symbol key'
       _ <- equal
-      schema' <- decoder'
-      pure (key, schema')
+      schema' <- try decoder'
+      pure (key', schema')
+
+    unknownDecoder :: Parser (Text, Athena)
+    unknownDecoder = do
+      key' <- key
+      _ <- equal
+      schema' <- try string
+      pure (key', schema')
+
+    key :: Parser Text
+    key = takeWhileP (Just "key") anyCharacterExceptReserved
+      where
+        anyCharacterExceptReserved :: Char -> Bool
+        anyCharacterExceptReserved character = character `notElem` ['{', '}', '[', ']', ',', '=']
 
 array :: Parser Athena -> Parser Athena
 array decoder' = null' <|> (AArray <$> array')

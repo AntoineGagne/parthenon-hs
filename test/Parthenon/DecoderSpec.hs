@@ -157,6 +157,11 @@ spec = parallel $ do
                 )
               ]
           )
+    it "can decode a struct with unknown keys" $
+      parseMaybe (Decoder.struct [("a", Decoder.integer)]) "{unknown_key=1234, a=1234}"
+        `shouldBe` Just
+          ( AStruct [("unknown_key", AString "1234"), ("a", AInt 1234)]
+          )
     it "can decode a struct with array of structs" $
       parseMaybe
         ( Decoder.struct

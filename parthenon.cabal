@@ -5,7 +5,7 @@ cabal-version: 2.0
 -- see: https://github.com/sol/hpack
 
 name:           parthenon
-version:        0.1.0
+version:        0.1.1
 synopsis:       Athena Structure Parser
 description:    Please see the README on GitHub at <https://github.com/AntoineGagne/parthenon#readme>
 homepage:       https://github.com/AntoineGagne/parthenon-hs

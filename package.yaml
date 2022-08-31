@@ -1,8 +1,9 @@
 name: parthenon
 version: 0.1.1
-synopsis: Athena Structure Parser
+synopsis: AWS Athena Parser
 description:
-    Please see the README on GitHub at <https://github.com/AntoineGagne/parthenon#readme>
+  A parser for AWS Athena schemas and terms.
+category: Development
 homepage: https://github.com/AntoineGagne/parthenon-hs
 github: "AntoineGagne/parthenon-hs"
 license: BSD3

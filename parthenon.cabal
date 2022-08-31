@@ -6,8 +6,9 @@ cabal-version: 2.0
 
 name:           parthenon
 version:        0.1.1
-synopsis:       Athena Structure Parser
-description:    Please see the README on GitHub at <https://github.com/AntoineGagne/parthenon#readme>
+synopsis:       AWS Athena Parser
+description:    A parser for AWS Athena schemas and terms.
+category:       Development
 homepage:       https://github.com/AntoineGagne/parthenon-hs
 bug-reports:    https://github.com/AntoineGagne/parthenon-hs/issues
 author:         Antoine Gagné

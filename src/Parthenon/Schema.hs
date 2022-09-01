@@ -34,26 +34,50 @@ struct = do
     keyValue = do
       key <- characters
       _ <- symbol ":"
-      decoder <- encoder
+      decoder <- structEncoder
       pure (key, decoder)
 
+structEncoder :: Parser (Parser Athena)
+structEncoder =
+  try
+    ( integer
+        <|> bigInt
+        <|> boolean
+        <|> double
+        <|> string
+        <|> struct
+        <|> array
+    )
+  where
+    string :: Parser (Parser Athena)
+    string = symbol "string" $> Decoder.structString
+
 encoder :: Parser (Parser Athena)
-encoder = try (integer <|> bigInt <|> boolean <|> double <|> string <|> struct <|> array)
+encoder =
+  try
+    ( integer
+        <|> bigInt
+        <|> boolean
+        <|> double
+        <|> string
+        <|> struct
+        <|> array
+    )
   where
     string :: Parser (Parser Athena)
     string = symbol "string" $> Decoder.string
 
-    integer :: Parser (Parser Athena)
-    integer = symbol "int" $> Decoder.integer
+integer :: Parser (Parser Athena)
+integer = symbol "int" $> Decoder.integer
 
-    bigInt :: Parser (Parser Athena)
-    bigInt = symbol "bigint" $> Decoder.bigInt
+bigInt :: Parser (Parser Athena)
+bigInt = symbol "bigint" $> Decoder.bigInt
 
-    double :: Parser (Parser Athena)
-    double = symbol "double" $> Decoder.double
+double :: Parser (Parser Athena)
+double = symbol "double" $> Decoder.double
 
-    boolean :: Parser (Parser Athena)
-    boolean = symbol "boolean" $> Decoder.boolean
+boolean :: Parser (Parser Athena)
+boolean = symbol "boolean" $> Decoder.boolean
 
 betweenAngleBrackets :: Parser a -> Parser a
 betweenAngleBrackets = between leftAngle rightAngle

@@ -73,6 +73,45 @@ spec = parallel $ do
                 )
               ]
           )
+    it "can decode a struct with string that contains commas" $
+      parseMaybe
+        "struct<b:string>"
+        "{b=foo bar, jane smith}"
+        `shouldBe` Just
+          ( AStruct
+              [ ("b", AString "foo bar, jane smith")
+              ]
+          )
+    it "can decode a struct with string that contains commas and unknown keys" $
+      parseMaybe
+        "struct<b:string>"
+        "{a=123, b=foo bar, jane smith, c=123, d=true, e=-2.0}"
+        `shouldBe` Just
+          ( AStruct
+              [ ("a", AString "123"),
+                ("b", AString "foo bar, jane smith"),
+                ("c", AString "123"),
+                ("d", AString "true"),
+                ("e", AString "-2.0")
+              ]
+          )
+    it "can decode a nested struct with string that contains commas and unknown keys" $
+      parseMaybe
+        "struct<a:struct<b:string>>"
+        "{a={a=123, b=foo bar, jane smith, c=123, d=true, e=-2.0}}"
+        `shouldBe` Just
+          ( AStruct
+              [ ( "a",
+                  AStruct
+                    [ ("a", AString "123"),
+                      ("b", AString "foo bar, jane smith"),
+                      ("c", AString "123"),
+                      ("d", AString "true"),
+                      ("e", AString "-2.0")
+                    ]
+                )
+              ]
+          )
 
 parseMaybe :: Text -> Text -> Maybe Athena
 parseMaybe rawSchema input = do

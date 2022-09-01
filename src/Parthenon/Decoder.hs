@@ -6,7 +6,7 @@ module Parthenon.Decoder
     bigInt,
     array,
     struct,
-    specialString,
+    structString,
     Athena (..),
   )
 where
@@ -14,6 +14,7 @@ where
 import Control.Monad.Combinators
 import Data.Functor (($>))
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Data.Void
 import Parthenon.Types (Athena (..))
 import Text.Megaparsec
@@ -31,7 +32,7 @@ struct entries' =
     struct' = between leftBrace rightBrace entries
 
     entries :: Parser [(Text, Athena)]
-    entries = (choice decoders <|> unknownDecoder) `sepBy` comma
+    entries = (try (choice decoders) <|> unknownDecoder) `sepBy` comma
 
     decoders :: [Parser (Text, Athena)]
     decoders = map decoder entries'
@@ -47,7 +48,7 @@ struct entries' =
     unknownDecoder = do
       key' <- key
       _ <- equal
-      schema' <- try string
+      schema' <- try structString
       pure (key', schema')
 
     key :: Parser Text
@@ -62,8 +63,24 @@ array decoder' = null' <|> (AArray <$> array')
     array' :: Parser [Athena]
     array' = between leftSquare rightSquare (decoder' `sepBy` comma)
 
-specialString :: Parser Athena
-specialString = null'
+structString :: Parser Athena
+structString = null' <|> AString <$> characters
+  where
+    characters :: Parser Text
+    characters = do
+      input <- getInput
+      let n = case (Text.findIndex (== '=') input, Text.findIndex (== '}') input) of
+            (Nothing, Nothing) -> 0
+            (Just _, Nothing) -> 0
+            (Nothing, Just n') -> n'
+            (Just m, Just n')
+              | m < n' ->
+                let untilEqual = Text.take m input
+                    (taken', _) = Text.breakOnEnd "," untilEqual
+                 in Text.length taken' - 1
+            (Just _, Just n') ->
+              n' - 1
+      takeP (Just "characters") n
 
 string :: Parser Athena
 string = null' <|> (AString <$> characters)

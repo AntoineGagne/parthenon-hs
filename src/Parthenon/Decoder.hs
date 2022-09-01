@@ -15,6 +15,7 @@ module Parthenon.Decoder
   )
 where
 
+import Control.Monad (void)
 import Control.Monad.Combinators
 import Data.Functor (($>))
 import Data.Text (Text)
@@ -42,15 +43,15 @@ struct entries' =
 
     decoder :: (Text, Parser Athena) -> Parser (Text, Athena)
     decoder (key', decoder') = do
-      _ <- try $ symbol key'
-      _ <- equal
+      void $ symbol key'
+      void equal
       schema' <- try decoder'
       pure (key', schema')
 
     unknownDecoder :: Parser (Text, Athena)
     unknownDecoder = do
       key' <- key
-      _ <- equal
+      void equal
       schema' <- try structString
       pure (key', schema')
 
@@ -72,18 +73,17 @@ structString = null' <|> AString <$> characters
     characters :: Parser Text
     characters = do
       input <- getInput
-      let n = case (Text.findIndex (== '=') input, Text.findIndex (== '}') input) of
-            (Nothing, Nothing) -> 0
-            (Just _, Nothing) -> 0
-            (Nothing, Just n') -> n'
-            (Just m, Just n')
-              | m < n' ->
-                let untilEqual = Text.take m input
-                    (taken', _) = Text.breakOnEnd "," untilEqual
-                 in Text.length taken' - 1
-            (Just _, Just n') ->
-              n' - 1
-      takeP (Just "characters") n
+      case (Text.findIndex (== '=') input, Text.findIndex (== '}') input) of
+        (Nothing, Nothing) -> unexpected EndOfInput
+        (Just _, Nothing) -> unexpected EndOfInput
+        (Nothing, Just n') -> takeP (Just "characters") n'
+        (Just m, Just n')
+          | m < n' ->
+            let untilEqual = Text.take m input
+                (taken', _) = Text.breakOnEnd "," untilEqual
+             in takeP (Just "characters") (Text.length taken' - 1)
+        (Just _, Just n') ->
+          takeP (Just "characters") (n' - 1)
 
 string :: Parser Athena
 string = null' <|> (AString <$> characters)

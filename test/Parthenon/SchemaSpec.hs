@@ -132,6 +132,24 @@ spec = parallel $ do
                 )
               ]
           )
+    it "can decode a struct with string that contains equal symbols" $
+      parseMaybe
+        "struct<b:string>"
+        "{b=foo=bar=}"
+        `shouldBe` Just
+          ( AStruct
+              [ ("b", AString "foo=bar=")
+              ]
+          )
+    it "can decode a struct with string that contains equal symbols and commas" $
+      parseMaybe
+        "struct<b:string>"
+        "{b=foo=bar==,foo,bar}"
+        `shouldBe` Just
+          ( AStruct
+              [ ("b", AString "foo=bar==,foo,bar")
+              ]
+          )
 
 parseMaybe :: Text -> Text -> Maybe Athena
 parseMaybe rawSchema input = do

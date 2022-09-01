@@ -73,29 +73,33 @@ structString = null' <|> AString <$> characters
     characters :: Parser Text
     characters = do
       input <- getInput
-      case findPosition input of
-        Nothing -> unexpected EndOfInput
-        Just n -> takeP (Just "characters") n
+      case findPosition input 0 Nothing of
+        0 -> unexpected EndOfInput
+        n -> takeP (Just "characters") (n - 1)
 
-    findPosition :: Text -> Maybe Int
-    findPosition input =
-      case (Text.findIndex (== '=') input, Text.findIndex (== '}') input) of
-        (Nothing, Nothing) -> Nothing
-        (Just _, Nothing) -> Nothing
-        -- At the end of the last struct, on the last key. For example:
-        -- [..., {b=123, current_key=foo, bar}]
-        (Nothing, Just n) -> Just n
-        -- In a structure, before other keys. For example:
-        -- {current_key=foo, bar, b=1234}
-        (Just m, Just n)
-          | m < n ->
-            let untilEqual = Text.take m input
-                (taken, _) = Text.breakOnEnd "," untilEqual
-             in Just (Text.length taken - 1)
-        -- At the end of a structure, but not the final structure. For example:
-        -- [{b=1234, current_key=foo, bar}, {b=125, other_key=some value}]
-        (Just _, Just n) ->
-          Just n
+    findPosition :: Text -> Int -> Maybe Int -> Int
+    findPosition input position n@(Just lastComma) =
+      case Text.uncons input of
+        Just ('}', _) ->
+          position + 1
+        Just ('=', _) ->
+          lastComma
+        Just (',', rest) ->
+          findPosition rest (position + 1) (Just (position + 1))
+        Just (_, rest) ->
+          findPosition rest (position + 1) n
+        Nothing ->
+          position
+    findPosition input position Nothing =
+      case Text.uncons input of
+        Just ('}', _) ->
+          position + 1
+        Just (',', rest) ->
+          findPosition rest (position + 1) (Just (position + 1))
+        Just (_, rest) ->
+          findPosition rest (position + 1) Nothing
+        Nothing ->
+          position
 
 string :: Parser Athena
 string = null' <|> (AString <$> characters)

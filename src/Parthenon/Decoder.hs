@@ -1,13 +1,17 @@
 module Parthenon.Decoder
   ( boolean,
     double,
+    decimal,
+    char,
+    float,
     string,
     integer,
+    tinyInt,
+    smallInt,
     bigInt,
     array,
     struct,
     structString,
-    Athena (..),
   )
 where
 
@@ -16,10 +20,9 @@ import Data.Functor (($>))
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Void
-import Parthenon.Types (Athena (..))
+import Parthenon.Types (Athena (..), Length, Precision, Scale)
 import Text.Megaparsec
 import Text.Megaparsec.Char (space)
-import Text.Megaparsec.Char.Lexer (decimal, float)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 type Parser = Parsec Void Text
@@ -92,13 +95,25 @@ string = null' <|> (AString <$> characters)
     anyCharacterExceptReserved character = character `notElem` ['{', '}', '[', ']', ',']
 
 integer :: Parser Athena
-integer = null' <|> (AInt <$> Lexer.signed space decimal)
+integer = null' <|> (AInt <$> Lexer.signed space Lexer.decimal)
+
+tinyInt :: Parser Athena
+tinyInt = null' <|> (ATinyInt <$> Lexer.signed space Lexer.decimal)
+
+smallInt :: Parser Athena
+smallInt = null' <|> (ASmallInt <$> Lexer.signed space Lexer.decimal)
 
 bigInt :: Parser Athena
-bigInt = null' <|> (ABigInt <$> Lexer.signed space decimal)
+bigInt = null' <|> (ABigInt <$> Lexer.signed space Lexer.decimal)
 
 double :: Parser Athena
-double = null' <|> (ADouble <$> Lexer.signed space float)
+double = null' <|> (ADouble <$> Lexer.signed space Lexer.float)
+
+decimal :: Precision -> Scale -> Parser Athena
+decimal precision scale = null' <|> (ADecimal precision scale <$> Lexer.signed space Lexer.float)
+
+float :: Parser Athena
+float = null' <|> (AFloat <$> Lexer.signed space Lexer.float)
 
 boolean :: Parser Athena
 boolean = null' <|> (ABoolean <$> boolean')
@@ -116,6 +131,9 @@ null' :: Parser Athena
 null' = do
   _ <- symbol "null"
   pure ANull
+
+char :: Length -> Parser Athena
+char length' = null' <|> (AChar length' <$> takeP (Just "fixed characters") length')
 
 equal :: Parser Text
 equal = symbol "="

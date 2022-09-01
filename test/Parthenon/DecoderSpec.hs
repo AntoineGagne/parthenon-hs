@@ -17,6 +17,20 @@ spec = parallel $ do
       parseMaybe Decoder.double "-2.0" `shouldBe` Just (ADouble (-2.0))
     it "can decode null double" $
       parseMaybe Decoder.double "null" `shouldBe` Just ANull
+  describe "float" $ do
+    it "can decode a float" $
+      parseMaybe Decoder.float "2.0" `shouldBe` Just (AFloat 2.0)
+    it "can decode negative float" $
+      parseMaybe Decoder.float "-2.0" `shouldBe` Just (AFloat (-2.0))
+    it "can decode null float" $
+      parseMaybe Decoder.float "null" `shouldBe` Just ANull
+  describe "decimal" $ do
+    it "can decode a decimal" $
+      parseMaybe (Decoder.decimal 2 1) "2.0" `shouldBe` Just (ADecimal 2 1 2.0)
+    it "can decode negative decimal" $
+      parseMaybe (Decoder.decimal 2 1) "-2.0" `shouldBe` Just (ADecimal 2 1 (-2.0))
+    it "can decode null decimal" $
+      parseMaybe (Decoder.decimal 2 1) "null" `shouldBe` Just ANull
   describe "boolean" $ do
     it "can decode \"true\"" $
       parseMaybe Decoder.boolean "true" `shouldBe` Just (ABoolean True)
@@ -24,6 +38,20 @@ spec = parallel $ do
       parseMaybe Decoder.boolean "false" `shouldBe` Just (ABoolean False)
     it "can decode null boolean" $
       parseMaybe Decoder.boolean "null" `shouldBe` Just ANull
+  describe "tinyInt" $ do
+    it "can decode a tiny integer" $
+      parseMaybe Decoder.tinyInt "120" `shouldBe` Just (ATinyInt 120)
+    it "can decode a negative tiny integer" $
+      parseMaybe Decoder.tinyInt "-120" `shouldBe` Just (ATinyInt (-120))
+    it "can decode a null tiny integer" $
+      parseMaybe Decoder.tinyInt "null" `shouldBe` Just ANull
+  describe "smallInt" $ do
+    it "can decode a small integer" $
+      parseMaybe Decoder.smallInt "200" `shouldBe` Just (ASmallInt 200)
+    it "can decode a negative small integer" $
+      parseMaybe Decoder.smallInt "-200" `shouldBe` Just (ASmallInt (-200))
+    it "can decode a null small integer" $
+      parseMaybe Decoder.smallInt "null" `shouldBe` Just ANull
   describe "bigInt" $ do
     it "can decode a big integer" $
       parseMaybe Decoder.bigInt "2000000" `shouldBe` Just (ABigInt 2000000)
@@ -49,15 +77,46 @@ spec = parallel $ do
     it "can decode a string with special characters" $
       parseMaybe Decoder.string "(some/spaces\\in|between)"
         `shouldBe` Just (AString "(some/spaces\\in|between)")
+  describe "char" $ do
+    it "can decode fixed string" $
+      parseMaybe (Decoder.char 10) "1234554321" `shouldBe` Just (AChar 10 "1234554321")
+    it "can decode null fixed string" $
+      parseMaybe (Decoder.char 10) "null" `shouldBe` Just ANull
+    it "can decode a fixed string with spaces" $
+      parseMaybe (Decoder.char 9) "some spac"
+        `shouldBe` Just (AChar 9 "some spac")
+    it "fails on invalid length" $
+      parseMaybe (Decoder.char 9) "some" `shouldBe` Nothing
+    it "can decode a fixed string with special characters" $
+      parseMaybe (Decoder.char 8) "(so|e\\/)"
+        `shouldBe` Just (AChar 8 "(so|e\\/)")
   describe "array" $ do
     it "can decode an array of integer" $
       parseMaybe (Decoder.array Decoder.integer) "[42]"
-        `shouldBe` Just (AArray [Decoder.AInt 42])
+        `shouldBe` Just (AArray [AInt 42])
+    it "can decode an array of tiny integer" $
+      parseMaybe (Decoder.array Decoder.tinyInt) "[42]"
+        `shouldBe` Just (AArray [ATinyInt 42])
+    it "can decode an array of small integer" $
+      parseMaybe (Decoder.array Decoder.smallInt) "[42]"
+        `shouldBe` Just (AArray [ASmallInt 42])
+    it "can decode an array of floats" $
+      parseMaybe (Decoder.array Decoder.float) "[2.1]"
+        `shouldBe` Just (AArray [AFloat 2.1])
+    it "can decode an array of doubles" $
+      parseMaybe (Decoder.array Decoder.double) "[2.1]"
+        `shouldBe` Just (AArray [ADouble 2.1])
     it "can decode an array of big integer" $
       parseMaybe (Decoder.array Decoder.bigInt) "[42, 7]"
         `shouldBe` Just
           ( AArray
               [ABigInt 42, ABigInt 7]
+          )
+    it "can decode an array of fixed strings" $
+      parseMaybe (Decoder.array (Decoder.char 3)) "[foo, bar]"
+        `shouldBe` Just
+          ( AArray
+              [AChar 3 "foo", AChar 3 "bar"]
           )
     it "can decode an array of simple strings" $
       parseMaybe (Decoder.array Decoder.string) "[foo, bar]"
@@ -116,17 +175,27 @@ spec = parallel $ do
               ("b", Decoder.string),
               ("c", Decoder.boolean),
               ("d", Decoder.double),
-              ("e", Decoder.bigInt)
+              ("e", Decoder.bigInt),
+              ("f", Decoder.tinyInt),
+              ("g", Decoder.smallInt),
+              ("h", Decoder.float),
+              ("i", Decoder.decimal 2 3),
+              ("j", Decoder.char 2)
             ]
         )
-        "{a=1,b=foo,c=true,d=2.0,e=2000}"
+        "{a=1,b=foo,c=true,d=2.0,e=2000,f=123,g=123,h=1.2,i=2.3,j=ab}"
         `shouldBe` Just
           ( AStruct
               [ ("a", AInt 1),
                 ("b", AString "foo"),
                 ("c", ABoolean True),
                 ("d", ADouble 2.0),
-                ("e", ABigInt 2000)
+                ("e", ABigInt 2000),
+                ("f", ATinyInt 123),
+                ("g", ASmallInt 123),
+                ("h", AFloat 1.2),
+                ("i", ADecimal 2 3 2.3),
+                ("j", AChar 2 "ab")
               ]
           )
     it "can decode a flat struct with spaces" $

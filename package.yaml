@@ -1,5 +1,5 @@
 name: parthenon
-version: 0.1.2
+version: 0.2.0
 synopsis: AWS Athena Parser
 description:
   A parser for AWS Athena schemas and terms.

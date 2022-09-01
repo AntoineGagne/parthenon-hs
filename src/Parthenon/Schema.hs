@@ -3,6 +3,7 @@ module Parthenon.Schema
   )
 where
 
+import Control.Monad (void)
 import Control.Monad.Combinators
 import Data.Functor (($>))
 import Data.Text (Text)
@@ -20,20 +21,20 @@ schema = try (array <|> struct)
 
 array :: Parser (Parser Athena)
 array = do
-  _ <- symbol "array"
+  void $ symbol "array"
   encoder' <- betweenAngleBrackets encoder
   pure $ Decoder.array encoder'
 
 struct :: Parser (Parser Athena)
 struct = do
-  _ <- symbol "struct"
+  void $ symbol "struct"
   encoders <- betweenAngleBrackets (sepBy keyValue comma)
   pure $ Decoder.struct encoders
   where
     keyValue :: Parser (Text, Parser Athena)
     keyValue = do
       key <- characters
-      _ <- symbol ":"
+      void $ symbol ":"
       decoder <- structEncoder
       pure (key, decoder)
 
@@ -100,13 +101,13 @@ boolean = symbol "boolean" $> Decoder.boolean
 
 char :: Parser (Parser Athena)
 char = do
-  _ <- symbol "char"
+  void $ symbol "char"
   length' <- betweenParenthesis Lexer.decimal
   pure $ Decoder.char length'
 
 decimal :: Parser (Parser Athena)
 decimal = do
-  _ <- symbol "decimal"
+  void $ symbol "decimal"
   (precision, scale) <- betweenParenthesis numbers
   pure $ Decoder.decimal precision scale
   where

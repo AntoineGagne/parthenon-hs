@@ -15,6 +15,7 @@ module Parthenon.Decoder
   )
 where
 
+import Control.Monad (void)
 import Control.Monad.Combinators
 import Data.Functor (($>))
 import Data.Text (Text)
@@ -42,15 +43,15 @@ struct entries' =
 
     decoder :: (Text, Parser Athena) -> Parser (Text, Athena)
     decoder (key', decoder') = do
-      _ <- try $ symbol key'
-      _ <- equal
+      void $ symbol key'
+      void equal
       schema' <- try decoder'
       pure (key', schema')
 
     unknownDecoder :: Parser (Text, Athena)
     unknownDecoder = do
       key' <- key
-      _ <- equal
+      void equal
       schema' <- try structString
       pure (key', schema')
 
@@ -72,18 +73,29 @@ structString = null' <|> AString <$> characters
     characters :: Parser Text
     characters = do
       input <- getInput
-      let n = case (Text.findIndex (== '=') input, Text.findIndex (== '}') input) of
-            (Nothing, Nothing) -> 0
-            (Just _, Nothing) -> 0
-            (Nothing, Just n') -> n'
-            (Just m, Just n')
-              | m < n' ->
-                let untilEqual = Text.take m input
-                    (taken', _) = Text.breakOnEnd "," untilEqual
-                 in Text.length taken' - 1
-            (Just _, Just n') ->
-              n' - 1
-      takeP (Just "characters") n
+      case findPosition input of
+        Nothing -> unexpected EndOfInput
+        Just n -> takeP (Just "characters") n
+
+    findPosition :: Text -> Maybe Int
+    findPosition input =
+      case (Text.findIndex (== '=') input, Text.findIndex (== '}') input) of
+        (Nothing, Nothing) -> Nothing
+        (Just _, Nothing) -> Nothing
+        -- At the end of the last struct, on the last key. For example:
+        -- [..., {b=123, current_key=foo, bar}]
+        (Nothing, Just n) -> Just n
+        -- In a structure, before other keys. For example:
+        -- {current_key=foo, bar, b=1234}
+        (Just m, Just n)
+          | m < n ->
+            let untilEqual = Text.take m input
+                (taken, _) = Text.breakOnEnd "," untilEqual
+             in Just (Text.length taken - 1)
+        -- At the end of a structure, but not the final structure. For example:
+        -- [{b=1234, current_key=foo, bar}, {b=125, other_key=some value}]
+        (Just _, Just n) ->
+          Just n
 
 string :: Parser Athena
 string = null' <|> (AString <$> characters)

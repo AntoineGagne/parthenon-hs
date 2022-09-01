@@ -231,6 +231,16 @@ spec = parallel $ do
         `shouldBe` Just
           ( AStruct [("unknown_key", AString "1234"), ("a", AInt 1234)]
           )
+    it "can decode multiple structs with strings" $
+      parseMaybe
+        (Decoder.array (Decoder.struct [("a", Decoder.structString)]))
+        "[{a=foo bar, foo bar}, {a=test, test}]"
+        `shouldBe` Just
+          ( AArray
+              [ AStruct [("a", AString "foo bar, foo bar")],
+                AStruct [("a", AString "test, test")]
+              ]
+          )
     it "can decode a struct with array of structs" $
       parseMaybe
         ( Decoder.struct

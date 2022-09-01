@@ -5,7 +5,7 @@ cabal-version: 2.0
 -- see: https://github.com/sol/hpack
 
 name:           parthenon
-version:        0.1.1
+version:        0.1.2
 synopsis:       AWS Athena Parser
 description:    A parser for AWS Athena schemas and terms.
 category:       Development

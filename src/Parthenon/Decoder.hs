@@ -145,7 +145,7 @@ boolean = null' <|> (ABoolean <$> boolean')
 
 null' :: Parser Athena
 null' = do
-  _ <- symbol "null"
+  void $ symbol "null"
   pure ANull
 
 char :: Length -> Parser Athena

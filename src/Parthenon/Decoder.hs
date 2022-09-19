@@ -39,7 +39,7 @@ struct entries' =
     entries = (try (choice decoders) <|> unknownDecoder) `sepBy` comma
 
     decoders :: [Parser (Text, Athena)]
-    decoders = map decoder entries'
+    decoders = map (try . decoder) entries'
 
     decoder :: (Text, Parser Athena) -> Parser (Text, Athena)
     decoder (key', decoder') = do

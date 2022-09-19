@@ -93,6 +93,43 @@ spec = parallel $ do
                 )
               ]
           )
+    it "can decode a complex struct" $
+      parseMaybe
+        "struct<id:string,tmax:int,imp:array<struct<id:string,exp:int,video:struct<minduration:int,maxduration:int>,banner:struct<protocol:int,protocols:array<int>,w:int,h:int,ext:struct<id:string,ids:array<string>>>>>>"
+        "{id=6a61e880-90a3-4421-80b0-150910cbfc74,tmax=80,imp=[{id=eea25994-cd64-4404-92ed-aa2ea0408316,exp=3600,banner={protocol=5,protocols=[1,2,3,4,5],w=5,h=10,ext={id=7e4b1fac-1d61-4933-8681-159188c56c63,ids=[61a51531-6e89-4ba9-bfea-7138ab6aec56, 5a4e23d2-0b41-4166-acd6-77202ce67c56]}}}]}"
+        `shouldBe` Just
+          ( AStruct
+              [ ("id", AString "6a61e880-90a3-4421-80b0-150910cbfc74"),
+                ("tmax", AInt 80),
+                ( "imp",
+                  AArray
+                    [ AStruct
+                        [ ("id", AString "eea25994-cd64-4404-92ed-aa2ea0408316"),
+                          ("exp", AInt 3600),
+                          ( "banner",
+                            AStruct
+                              [ ("protocol", AInt 5),
+                                ("protocols", AArray [AInt 1, AInt 2, AInt 3, AInt 4, AInt 5]),
+                                ("w", AInt 5),
+                                ("h", AInt 10),
+                                ( "ext",
+                                  AStruct
+                                    [ ("id", AString "7e4b1fac-1d61-4933-8681-159188c56c63"),
+                                      ( "ids",
+                                        AArray
+                                          [ AString "61a51531-6e89-4ba9-bfea-7138ab6aec56",
+                                            AString "5a4e23d2-0b41-4166-acd6-77202ce67c56"
+                                          ]
+                                      )
+                                    ]
+                                )
+                              ]
+                          )
+                        ]
+                    ]
+                )
+              ]
+          )
     it "can decode a struct with string that contains commas" $
       parseMaybe
         "struct<b:string>"

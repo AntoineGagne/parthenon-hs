@@ -24,7 +24,7 @@ jobs:
       run: stack --local-bin-path=build/bin install
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: parthenon-Linux-x86_64
         path: build/bin/parthenon
@@ -39,7 +39,7 @@ jobs:
       run: stack --local-bin-path=build/bin install
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: parthenon-Darwin-x86_64
         path: build/bin/parthenon
@@ -54,7 +54,7 @@ jobs:
       run: stack --local-bin-path=build/bin install
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: parthenon-Windows-x86_64
         path: build/bin/parthenon.exe

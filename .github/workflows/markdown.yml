@@ -17,7 +17,7 @@ jobs:
     name: remark-lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: remark-lint
         run: |
           docker pull zemanlx/remark-lint:0.1.4

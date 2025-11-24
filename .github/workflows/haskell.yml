@@ -33,7 +33,7 @@ jobs:
     # setup:
 
     - name: Check out
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
 
     - name: Setup Haskell
